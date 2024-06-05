@@ -3,11 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 import xml.etree.ElementTree as et
 
-import pandas as pd
-import ssl
-import time as t
+
 from load_stock_data import save_data
-from get_data_from_website import
+
+
+def universal(url: str):
+    pass
+
 
 def load_xml(url: str):
     r = requests.get(url)
