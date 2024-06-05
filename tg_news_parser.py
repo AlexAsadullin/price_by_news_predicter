@@ -2,15 +2,12 @@ import asyncio
 import re
 import datetime as dt
 import pyrogram
-import telebot
-import subprocess
-from collections import defaultdict
+
 from load_stock_data import save_data
 
 # tg bot config data
 api_id = 27652585
 api_hash = '7484bada002fc45758ce353a31ff2da1'
-history = defaultdict(list)
 
 
 def remove_emoji(data):
@@ -55,7 +52,8 @@ async def read_tg_channel(channel_id: int, lookback=7):
         return news
 
 
-data = asyncio.run(read_tg_channel(channel_id=-1001498653424))
-data = remove_nulls(data)
-data = remove_emoji(data)
-save_data(name='tg_rbc_invest', data=data, extension='json')
+if __name__ == '__main__':
+    data = asyncio.run(read_tg_channel(channel_id=-1001498653424))
+    data = remove_nulls(data)
+    data = remove_emoji(data)
+    save_data(name='tg_rbc_invest', data=data, extension='json')
