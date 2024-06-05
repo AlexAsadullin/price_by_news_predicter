@@ -4,6 +4,7 @@ import asyncio
 import json
 from tg_news_parser import *
 
+
 TOKEN = ''
 bot = telebot.TeleBot(TOKEN)
 MESSG = {}

@@ -6,9 +6,9 @@ from urllib import parse
 
 
 def save_data(name: str, data, extension='json'):
-    with open(f'{name}.{extension}', 'w') as file:
+    with open(f'{name}.{extension}', 'w', encoding='utf-8') as file:
         if extension == 'json':
-            file.write(json.dumps(data))
+            file.write(json.dumps(data, ensure_ascii=False))
         elif extension == 'csv' and 'DataFrame' in str(type(data)):
             file.write(data.to_scv())
 
