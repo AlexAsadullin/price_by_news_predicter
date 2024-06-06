@@ -1,37 +1,30 @@
 import json
 import requests
-import xml.etree.ElementTree as ET
-
-
-from load_stock_data import save_data
-
-
-def cleaning(data: list, params: list):
-    new_data = []
-    for news in data:
-        for parameter in params:
-            if parameter in news:
-                break
-        else:
-            new_data.append(news)
-    return new_data
-
-
-def load_xml(url: str):
-    pass
-
-
-def parse_xml():
-    way = r''
-    tree = ET.parse(way)
-    root = tree.getroot()
-    root.find('')
-
-url = 'http://static.feed.rbc.ru/rbc/logical/footer/news.rss'
-r = requests.get(url)
+import xmltodict
 
 
 
-print(dir(r))
-print(r.text)
-# save_data(name='rbc', data=data, extension='json')
+def parse_xml(filename: str):
+    file = open(f'{filename}.xml', "rb")
+    news_dict = xmltodict.parse(file)
+
+    with open(f'{filename}.json', 'w') as f:
+        f.write(json.dumps(news_dict))
+    return news_dict
+
+
+def download_rss_xml(url: str, filename: str):
+    response = requests.get(url)
+    response.raise_for_status()
+    xml_content = response.content
+
+    with open(f"{filename}.xml", "wb") as f:
+        f.write(xml_content)
+    return xml_content
+
+
+if __name__ == '__main__':
+    rss_url = 'http://static.feed.rbc.ru/rbc/logical/footer/news.rss'
+    xml_content = download_rss_xml(rss_url, 'news')
+    news_dict = parse_xml('news')
+    parse_xml('news.xml')
