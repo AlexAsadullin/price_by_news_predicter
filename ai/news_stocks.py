@@ -1,48 +1,37 @@
-import json
 
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-import datetime as dt
 import seaborn as sns
 import re
 import os
 import sys
-import csv
-import codecs
+
 import pymorphy2
 # import gensim
 
 import nltk
 from nltk.stem.snowball import SnowballStemmer  # russian lang
 from nltk.stem import WordNetLemmatizer
-from nltk.corpus import stopwords
 
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, accuracy_score  # to install type 'scikit-learn'
+# to install type 'scikit-learn'
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Dense, Dropout, LSTM
-
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-sns.set_style("darkgrid")
-
-# константы
-COMPANY = 'AAPL'  # ticker of stock
-PREDICTION_DAYS = 365  # days looking back to
 
 
-def load_data():
-    data = json.loads('data\\rbc')
-    print(data)
-    # $$$ import data
+nltk.download('stopwords')
+'''os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+sns.set_style("darkgrid")'''
 
 
-def preprocess(text):
+def load_data_csv(name: str):
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(f'{name}.csv')))
+    news_df = pd.read_csv(f'{parent_dir}/{name}.csv')
+
+    return news_df # pandas dataframe
+
+
+def format_text(text):
+    from nltk.corpus import stopwords
     stopWords = set(stopwords.words('russian'))
 
     reg = re.compile('[^а-яА-Яa-zA-Z0-9 ]')  #
@@ -53,37 +42,25 @@ def preprocess(text):
     text = [morph.parse(word)[0].normal_form for word in text.split() if word not in stopWords]
     text = ' '.join(text)
 
-    return text
+    return text  # is 1 string
 
-
-def prepare_data(data):
-    x_train, x_test, y_train, y_test = train_test_split()
-
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_data = scaler.fit_transform(data['Close'].values.reshape(-1, 1))
-    # возвращаем выборки и модель масштабирования
-    return x_train, y_train, scaler
+def text_train_split(df):
+    from sklearn.model_selection import train_test_split
+    x_train, x_test, y_train, y_test = train_test_split(df['formatted-text'], df['y'], test_size=.15,
+                                                        random_state=42)
+    return x_train, x_test, y_train, y_test # strings
 
 
 def bow(x_train, x_test):
-    vectorizer = CountVectorizer(ngram_range=1, 2)
+    vectorizer = CountVectorizer(ngram_range=1)
     x_train_bow = vectorizer.fit_transform(x_train)
     x_test_bow = vectorizer.transform(x_test)
 
-
-def tfidf(x_train, x_test):
-    vectorizer = TfidfVectorizer()
-    x_train_tfidf = vectorizer.fit_transform(x_train)
-    x_test_tfidf = vectorizer.transform(x_test)
+    return x_train_bow, x_test_bow # lists of digits
 
 
 def building_model(x_train_bow, y_train):
     clf = LogisticRegression(random_state=0).fit(x_train_bow, y_train)
-    # создаем модель
-
-    # получаем признаки и цели из аргументов
-
-    # инициализируем модель
     model = Sequential()
     # создаем слои нейросети для обучения модели
     model.compile(optimizer='adam', loss='mean_squared_error')
@@ -96,4 +73,10 @@ def building_model(x_train_bow, y_train):
 
 
 if __name__ == '__main__':
-    load_data()
+    news_df = load_data_csv('news')
+    news_df['formatted-text'] = news_df['full-text'].apply(format_text)
+    # creating as;dfkjasd;fkj
+    x_train, x_test, y_train, y_test = text_train_split(news_df)
+    x_train_bow, x_test_bow = bow(x_train, x_test)
+
+    news_df.to_csv('news_to_learn.csv')

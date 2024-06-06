@@ -1,7 +1,30 @@
 import json
 import requests
 import xmltodict
+import pandas as pd
 
+
+def create_dataframe(filename: str):
+    rss_ribbon_dict = json.load(open(f'{filename}.json', "rb"))
+    news = rss_ribbon_dict['rss']['channel']['item']
+    pandas_news = []
+    for i in news:
+        row = {}
+        # keys might be different
+        row['title'] = i['title']
+        row['category'] = i['category']
+        row['date'] = i['rbc_news:date']#['__text']
+        row['time'] = i['rbc_news:time']#['__text']
+        row['full-text'] = i['rbc_news:full-text']#['__cdata']
+        row['tag'] = ''
+        try:
+            for tag in i['rbc_news:tag']:
+                row['tag'] += tag + ' '
+            pandas_news.append(row)
+        except Exception as e:
+            print(e)
+    news_df = pd.DataFrame(pandas_news)
+    news_df.to_csv('news.csv')
 
 
 def parse_xml(filename: str):
@@ -25,6 +48,9 @@ def download_rss_xml(url: str, filename: str):
 
 if __name__ == '__main__':
     rss_url = 'http://static.feed.rbc.ru/rbc/logical/footer/news.rss'
-    xml_content = download_rss_xml(rss_url, 'news')
-    news_dict = parse_xml('news')
-    parse_xml('news.xml')
+    filename = 'news'
+    xml_content = download_rss_xml(rss_url, filename)
+    news_dict = parse_xml(filename)
+    parse_xml(filename)
+
+    create_dataframe(filename)
