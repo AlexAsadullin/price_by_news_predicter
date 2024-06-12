@@ -20,7 +20,7 @@ def hello(message):  # hello функция
     bt2 = types.KeyboardButton('My profile')
     markup.add(bt1, bt2)
     bt1 = types.InlineKeyboardButton('Set new auto parsing')
-    bt2 = types.InlineKeyboardButton('My auto parwers')
+    bt2 = types.InlineKeyboardButton('My auto parsers')
     markup.add(bt1, bt2)
     bt1 = types.InlineKeyboardButton('New price monitoring')
     bt2 = types.InlineKeyboardButton('My price monitors')
